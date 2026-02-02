@@ -43,6 +43,7 @@ export const Navbar = () => {
                             const isActive = pathname === tab.href || (tab.href === "/profile" && pathname.startsWith("/profile"));
                             return (
                                 <Link
+                                    key={tab.href}
                                     href={tab.href}
                                     className={`relative flex items-center space-x-2 px-5 py-2 rounded-full text-sm font-semibold transition-all group/nav ${isActive ? "text-primary" : "text-muted hover:text-foreground"
                                         }`}
