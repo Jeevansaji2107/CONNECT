@@ -6,6 +6,7 @@ import { SessionProvider } from "next-auth/react";
 import { Toaster } from "sonner";
 import { NotificationListener } from "@/components/shared/NotificationListener";
 import { auth } from "@/auth";
+import { BackgroundEngine } from "@/components/shared/BackgroundEngine";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,13 +37,12 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased selection:bg-primary/30 mesh-bg`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <SessionProvider session={session}>
+          <BackgroundEngine />
           <Navbar />
           <main className="min-h-screen pt-16">
-            <div className="max-w-[1400px] mx-auto px-4 py-8">
-              {children}
-            </div>
+            {children}
           </main>
           <Toaster position="bottom-center" richColors theme="dark" />
           <NotificationListener />

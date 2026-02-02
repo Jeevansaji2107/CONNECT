@@ -5,8 +5,10 @@ const nextConfig: NextConfig = {
     domains: [
       "avatars.githubusercontent.com",
       "lh3.googleusercontent.com",
-      "api.dicebear.com"
+      "api.dicebear.com",
+      "i.pinimg.com"
     ],
+    dangerouslyAllowSVG: true,
   },
 };
 

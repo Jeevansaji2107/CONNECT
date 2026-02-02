@@ -125,3 +125,54 @@ export async function searchUsers(query: string) {
         return { success: false, error: "Failed to search users" };
     }
 }
+
+export async function updateProfile({ name, bio, image }: { name?: string, bio?: string, image?: string }) {
+    const session = await auth();
+    if (!session?.user?.id) throw new Error("Unauthorized");
+
+    try {
+        const updates: any = { updated_at: new Date().toISOString() };
+        if (name !== undefined) updates.name = name;
+        if (bio !== undefined) updates.bio = bio;
+        if (image !== undefined) updates.image = image;
+
+        const { error } = await supabase
+            .from("users")
+            .update(updates)
+            .eq("id", session.user.id);
+
+        if (error) throw error;
+
+        revalidatePath("/profile");
+        revalidatePath(`/profile/${session.user.id}`);
+        revalidatePath("/feed");
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to update profile:", error);
+        return { success: false, error: "Failed to update profile" };
+    }
+}
+
+export async function updateBio(bio: string) {
+    return updateProfile({ bio });
+}
+
+export async function updateProfileSettings(isIndexed: boolean) {
+    const session = await auth();
+    if (!session?.user?.id) throw new Error("Unauthorized");
+
+    try {
+        const { error } = await supabase
+            .from("users")
+            .update({ is_indexed: isIndexed, updated_at: new Date().toISOString() })
+            .eq("id", session.user.id);
+
+        if (error) throw error;
+
+        revalidatePath("/profile");
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to update profile settings:", error);
+        return { success: false, error: "Failed to update profile settings" };
+    }
+}

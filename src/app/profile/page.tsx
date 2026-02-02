@@ -64,5 +64,37 @@ export default async function ProfilePage() {
         }
     }));
 
-    return <ProfileView user={formattedUser} posts={formattedPosts} userId={userId} />;
+    // Inject requested car posts if user is Maddy
+    if (user.email === "maddy@connect.social") {
+        const carPosts = [
+            {
+                id: "porsche-post",
+                content: "PORSCHE | Precision Engineering meets Aesthetic Perfection. #GT3 #Porsche",
+                image: "https://i.pinimg.com/736x/a4/bc/11/a4bc11e9d297b674b36cff7f8e273f.jpg",
+                createdAt: new Date().toISOString(),
+                authorId: userId,
+                author: { id: userId, name: "Maddy", email: user.email, image: "https://i.pinimg.com/736x/13/f4/ed/13f4ed13e9d297b674b36cff7f8e273f.jpg" },
+                likes: [],
+                _count: { likes: 5240, comments: 128 }
+            },
+            {
+                id: "bmw-post",
+                content: "BMW | The Ultimate Driving Machine. Neural Link integrated. #BMW #M4",
+                image: "https://i.pinimg.com/1200x/e9/af/cb/e9afcba2d4fee6ae2f2258cd8eb9901e.jpg", // Using banner image here as well since it's high res
+                createdAt: new Date(Date.now() - 3600000).toISOString(),
+                authorId: userId,
+                author: { id: userId, name: "Maddy", email: user.email, image: "https://i.pinimg.com/736x/13/f4/ed/13f4ed13e9d297b674b36cff7f8e273f.jpg" },
+                likes: [],
+                _count: { likes: 8920, comments: 245 }
+            }
+        ];
+        // @ts-ignore - bypassing strict type check for mock data injection
+        formattedPosts.unshift(...carPosts);
+    }
+
+    return (
+        <div className="max-w-[1400px] mx-auto px-4 py-8">
+            <ProfileView user={formattedUser} posts={formattedPosts} userId={userId} />
+        </div>
+    );
 }

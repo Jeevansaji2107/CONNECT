@@ -9,10 +9,14 @@ import { logout } from "@/lib/actions/auth-actions";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { SearchInput } from "@/components/explore/SearchInput";
+import { useChatStore } from "@/lib/store";
+
 
 export const Navbar = () => {
     const { data: session } = useSession();
     const pathname = usePathname();
+    const unreadCount = useChatStore((state) => state.unreadCount);
+    const isPersonalUser = session?.user?.email?.toLowerCase().includes("jeevansaji2107");
 
     const tabs = [
         { href: "/feed", icon: Home, label: "Feed" },
@@ -27,9 +31,11 @@ export const Navbar = () => {
         <nav className="fixed top-0 left-0 right-0 z-[100] bg-background/80 backdrop-blur-md border-b border-border transition-all">
             <div className="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between">
                 <div className="flex items-center space-x-12">
-                    <Link href="/feed" className="flex items-center hover:opacity-80 transition-opacity">
-                        <Logo size="sm" />
-                    </Link>
+                    <div className="flex items-center space-x-4">
+                        <Link href="/feed" className="flex items-center hover:opacity-80 transition-opacity">
+                            <Logo size="sm" />
+                        </Link>
+                    </div>
 
                     <div className="hidden md:flex items-center space-x-1">
                         {tabs.map((tab) => {
@@ -37,17 +43,20 @@ export const Navbar = () => {
                             const isActive = pathname === tab.href || (tab.href === "/profile" && pathname.startsWith("/profile"));
                             return (
                                 <Link
-                                    key={tab.href}
                                     href={tab.href}
-                                    className={`relative flex items-center space-x-2 px-5 py-2 rounded-full text-sm font-semibold transition-colors ${isActive ? "text-primary" : "text-muted hover:text-foreground"
+                                    className={`relative flex items-center space-x-2 px-5 py-2 rounded-full text-sm font-semibold transition-all group/nav ${isActive ? "text-primary" : "text-muted hover:text-foreground"
                                         }`}
                                 >
                                     <Icon className="w-4 h-4 z-10" />
                                     <span className="z-10">{tab.label}</span>
+                                    {/* Shimmer Effect */}
+                                    <div className="absolute inset-0 rounded-full overflow-hidden opacity-0 group-hover/nav:opacity-100 transition-opacity">
+                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent -translate-x-full group-hover/nav:animate-[shimmer_2s_infinite]" />
+                                    </div>
                                     {isActive && (
                                         <motion.div
                                             layoutId="navbar-pill"
-                                            className="absolute inset-0 bg-primary/10 rounded-full"
+                                            className="absolute inset-0 bg-primary/10 rounded-full border border-primary/20"
                                             transition={{
                                                 type: "spring",
                                                 stiffness: 400,
@@ -74,10 +83,25 @@ export const Navbar = () => {
                                     href={`/profile/${session.user.id}`}
                                     className="flex items-center space-x-2 p-1 pr-4 rounded-full border border-border hover:bg-secondary transition-all"
                                 >
-                                    <div className="relative w-8 h-8 rounded-full overflow-hidden bg-secondary">
-                                        {(session.user.image || session.user.email === "maddy@connect.social") ? (
+                                    <div className="relative w-8 h-8 rounded-full overflow-hidden bg-secondary border border-white/5">
+                                        {(session.user.email?.toLowerCase() === "maddy@connect.social") ? (
                                             <Image
-                                                src={session.user.email === "maddy@connect.social" ? "/avatars/maddy.png" : (session.user.image || "")}
+                                                src="https://i.pinimg.com/736x/13/f4/ed/13f4ed13e9d297b674b36cff7f8e273f.jpg"
+                                                alt=""
+                                                fill
+                                                className="object-cover"
+                                                priority
+                                            />
+                                        ) : isPersonalUser ? (
+                                            <Image
+                                                src={session.user.image || "https://i.pinimg.com/736x/a3/27/bf/a327bf02ee0174a438746cc99a1c9e15.jpg"}
+                                                alt=""
+                                                fill
+                                                className="object-cover"
+                                            />
+                                        ) : session.user.image ? (
+                                            <Image
+                                                src={session.user.image}
                                                 alt=""
                                                 fill
                                                 className="object-cover"
@@ -88,10 +112,22 @@ export const Navbar = () => {
                                             </div>
                                         )}
                                     </div>
-                                    <span className="text-sm font-medium text-foreground truncate max-w-[100px] hidden sm:block">
-                                        {session.user.name}
+                                    <span className="text-sm font-black text-foreground truncate max-w-[150px] hidden sm:block uppercase tracking-tighter">
+                                        {isPersonalUser ? "JEEVAN SAJI" : session.user.name}
                                     </span>
                                 </Link>
+
+                                <div className="relative">
+                                    <button
+                                        className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-full transition-all"
+                                        title="Notifications"
+                                    >
+                                        <Bell className="w-5 h-5" />
+                                        {unreadCount > 0 && (
+                                            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-background" />
+                                        )}
+                                    </button>
+                                </div>
 
                                 <button
                                     onClick={() => logout()}

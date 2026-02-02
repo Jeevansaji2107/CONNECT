@@ -4,6 +4,8 @@ export interface User {
     email: string | null;
     image: string | null;
     bio: string | null;
+    isIndexed?: boolean;
+    followerCountCache?: number;
     createdAt: string;
 }
 
@@ -11,6 +13,7 @@ export interface Post {
     id: string;
     content: string;
     mediaUrls?: string[] | null;
+    visibility?: "public" | "followers" | "private";
     authorId: string;
     author: {
         id: string;
@@ -33,6 +36,7 @@ export interface Comment {
     id: string;
     content: string;
     postId: string;
+    parentId?: string | null;
     authorId: string;
     author: {
         id: string;

@@ -3,7 +3,8 @@ import { supabase } from "@/lib/supabase";
 import { notFound, redirect } from "next/navigation";
 import { format } from "date-fns";
 import Image from "next/image";
-import { MapPin, Calendar, Settings, Share2, Grid, Heart } from "lucide-react";
+import { MapPin, Calendar, Settings, Share2, Grid, Heart, MessageSquare } from "lucide-react";
+import Link from "next/link";
 import { PostCard } from "@/components/feed/PostCard";
 import { FollowButton } from "@/components/shared/FollowButton";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
@@ -74,8 +75,59 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
         }
     }));
 
-    const displayName = (userProfile.name === "Nexus Explorer" || !userProfile.name) ? "Connect Visionary" : userProfile.name;
-    const userImage = userProfile.email === "maddy@connect.social" ? "/avatars/maddy.png" : userProfile.image;
+    // Filter posts based on visibility
+    const visiblePosts = postsWithStatus.filter((post) => {
+        const visibility = post.visibility || "public";
+
+        // Public posts are visible to everyone
+        if (visibility === "public") return true;
+
+        // If viewing own profile, show all posts
+        if (currentUserId === id) return true;
+
+        // Private posts only visible to author
+        if (visibility === "private") return false;
+
+        // Followers-only posts visible to followers
+        if (visibility === "followers") {
+            return isFollowing;
+        }
+
+        return true;
+    });
+
+    const displayName = (userProfile.name === "Nexus Explorer" || !userProfile.name) ? "Maddy" : userProfile.name;
+    const userImage = userProfile.email === "maddy@connect.social"
+        ? "https://i.pinimg.com/736x/13/f4/ed/13f4ed13e9d297b674b36cff7f8e273f.jpg"
+        : userProfile.image;
+
+    // Inject requested car posts if user is Maddy
+    if (userProfile.email === "maddy@connect.social") {
+        const carPosts = [
+            {
+                id: "porsche-public",
+                content: "PORSCHE | Precision Engineering meets Aesthetic Perfection. #GT3 #Porsche",
+                image: "https://i.pinimg.com/736x/a4/bc/11/a4bc11e9d297b674b36cff7f8e273f.jpg",
+                createdAt: new Date().toISOString(),
+                authorId: id,
+                author: { id: id, name: "Maddy", email: userProfile.email, image: userImage },
+                likes: [],
+                _count: { likes: 5240, comments: 128 }
+            },
+            {
+                id: "bmw-public",
+                content: "BMW | The Ultimate Driving Machine. Neural Link integrated. #BMW #M4",
+                image: "https://i.pinimg.com/1200x/e9/af/cb/e9afcba2d4fee6ae2f2258cd8eb9901e.jpg",
+                createdAt: new Date(Date.now() - 3600000).toISOString(),
+                authorId: id,
+                author: { id: id, name: "Maddy", email: userProfile.email, image: userImage },
+                likes: [],
+                _count: { likes: 8920, comments: 245 }
+            }
+        ];
+        // @ts-ignore
+        visiblePosts.unshift(...carPosts);
+    }
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -120,26 +172,37 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
                             </div>
                         </div>
 
-                        <div className="flex gap-4 pb-2">
+                        <div className="flex gap-4 pb-2 items-center">
                             <FollowButton
                                 userId={userProfile.id}
                                 initialIsFollowing={isFollowing}
                                 className="scale-110 !px-8 !py-3 shadow-[0_0_20px_rgba(59,130,246,0.2)]"
                             />
+                            <Link
+                                href={`/chat?userId=${userProfile.id}`}
+                                className="flex items-center space-x-2 bg-secondary/50 hover:bg-secondary transition-colors px-6 py-3 rounded-xl border border-border/50 text-sm font-bold uppercase tracking-widest"
+                            >
+                                <MessageSquare className="w-4 h-4 text-primary" />
+                                <span>Message</span>
+                            </Link>
                         </div>
                     </div>
 
                     <div className="flex gap-12 pt-10 border-t border-border/5">
                         <div className="group cursor-pointer">
-                            <p className="text-3xl font-black text-foreground group-hover:text-primary transition-colors">{userProfile._count.followers}</p>
+                            <p className="text-3xl font-black text-foreground group-hover:text-primary transition-colors">
+                                {displayName === "Maddy" ? "100.0M" : userProfile._count.followers}
+                            </p>
                             <p className="text-[10px] font-black text-muted uppercase tracking-[0.2em] group-hover:text-foreground transition-colors">Followers</p>
                         </div>
                         <div className="group cursor-pointer">
-                            <p className="text-3xl font-black text-foreground group-hover:text-primary transition-colors">{userProfile._count.following}</p>
+                            <p className="text-3xl font-black text-foreground group-hover:text-primary transition-colors">
+                                {displayName === "Maddy" ? "1" : userProfile._count.following}
+                            </p>
                             <p className="text-[10px] font-black text-muted uppercase tracking-[0.2em] group-hover:text-foreground transition-colors">Following</p>
                         </div>
                         <div className="group cursor-pointer">
-                            <p className="text-3xl font-black text-foreground group-hover:text-primary transition-colors">{postsWithStatus.length}</p>
+                            <p className="text-3xl font-black text-foreground group-hover:text-primary transition-colors">{visiblePosts.length}</p>
                             <p className="text-[10px] font-black text-muted uppercase tracking-[0.2em] group-hover:text-foreground transition-colors">Transmissions</p>
                         </div>
                     </div>
@@ -162,8 +225,8 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
 
                 <ErrorBoundary>
                     <div className="space-y-6">
-                        {postsWithStatus.length > 0 ? (
-                            postsWithStatus.map((post) => (
+                        {visiblePosts.length > 0 ? (
+                            visiblePosts.map((post) => (
                                 <PostCard
                                     key={post.id}
                                     post={post}

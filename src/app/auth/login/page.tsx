@@ -1,39 +1,55 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { Logo } from "@/components/shared/Logo";
 import { Github, Mail, ShieldCheck, Zap } from "lucide-react";
 import Link from "next/link";
 import { loginGitHub, loginGoogle, loginDemo } from "@/lib/actions/auth-actions";
 
 export default function LoginPage() {
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-[#030303]">
-            {/* Immersive Background Orbs */}
+        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-[#0F172A] via-[#020617] to-black">
+            {/* Animated Particles */}
+            {/* Animated Particles - Full Screen Fixed */}
+            {mounted && (
+                <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+                    {[...Array(40)].map((_, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{
+                                x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
+                                y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
+                                opacity: Math.random() * 0.5 + 0.1,
+                                scale: Math.random() * 0.5 + 0.5,
+                            }}
+                            animate={{
+                                y: [null, Math.random() * -100],
+                                x: [null, (Math.random() - 0.5) * 50],
+                            }}
+                            transition={{
+                                duration: Math.random() * 10 + 10,
+                                repeat: Infinity,
+                                ease: "linear",
+                                repeatType: "reverse"
+                            }}
+                            className="absolute w-1 h-1 bg-blue-500/50 rounded-full blur-[1px]"
+                        />
+                    ))}
+                </div>
+            )}
+
+            {/* Subtle Blue Glows */}
             <motion.div
-                animate={{
-                    scale: [1, 1.2, 1],
-                    x: [0, 50, 0],
-                    y: [0, 30, 0]
-                }}
-                transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-connect-blue/20 blur-[130px] rounded-full"
-            />
-            <motion.div
-                animate={{
-                    scale: [1, 1.3, 1],
-                    x: [0, -40, 0],
-                    y: [0, -60, 0]
-                }}
-                transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-connect-magenta/15 blur-[150px] rounded-full"
-            />
-            <motion.div
-                animate={{
-                    opacity: [0.3, 0.6, 0.3],
-                }}
-                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-connect-purple/10 blur-[180px] rounded-full"
+                animate={{ opacity: [0.3, 0.5, 0.3] }}
+                transition={{ duration: 5, repeat: Infinity }}
+                className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_70%)] pointer-events-none"
             />
 
             <motion.div
@@ -42,7 +58,7 @@ export default function LoginPage() {
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                 className="w-full max-w-md relative z-10"
             >
-                <div className="glass-card p-10 text-center space-y-10 border border-white/10 shadow-[0_32px_64px_rgba(0,0,0,0.8)]">
+                <div className="glass-card p-10 text-center space-y-10 border border-blue-500/10 shadow-[0_32px_64px_rgba(0,0,0,0.8)]">
                     <div className="flex flex-col items-center space-y-6">
                         <motion.div
                             initial={{ rotate: -10, scale: 0 }}

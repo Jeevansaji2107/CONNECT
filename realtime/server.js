@@ -17,13 +17,14 @@ io.on("connection", (socket) => {
         console.log(`User ${socket.id} joined room ${room}`);
     });
 
-    socket.on("send-message", (data) => {
+    socket.on("send-message", async (data) => {
         console.log("Message received:", data);
-        // Broadcast to room
+
+        // Broadcast to specific room (conversation)
+        // Ensure room ID corresponds to the conversation pair
         io.to(data.room).emit("receive-message", {
-            id: Math.random().toString(36).substr(2, 9),
             ...data,
-            timestamp: new Date().toLocaleTimeString(),
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         });
     });
 
@@ -45,7 +46,7 @@ io.on("connection", (socket) => {
     });
 });
 
-const PORT = 3002;
+const PORT = 3004;
 server.listen(PORT, () => {
     console.log(`Real-time server running on port ${PORT}`);
 });

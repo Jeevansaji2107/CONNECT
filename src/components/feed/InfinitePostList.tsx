@@ -10,9 +10,10 @@ import { motion } from "framer-motion";
 interface InfinitePostListProps {
     initialPosts: Post[];
     initialCursor?: string;
+    filter?: string;
 }
 
-export const InfinitePostList = ({ initialPosts, initialCursor }: InfinitePostListProps) => {
+export const InfinitePostList = ({ initialPosts, initialCursor, filter = "all" }: InfinitePostListProps) => {
     const [posts, setPosts] = useState<Post[]>(initialPosts);
     const [cursor, setCursor] = useState<string | undefined>(initialCursor);
     const [isLoading, setIsLoading] = useState(false);
@@ -28,7 +29,7 @@ export const InfinitePostList = ({ initialPosts, initialCursor }: InfinitePostLi
 
         setIsLoading(true);
         try {
-            const result = await getPosts(cursor);
+            const result = await getPosts(cursor, 10, filter);
             if (result.success && result.posts) {
                 setPosts((prev) => [...prev, ...(result.posts as Post[])]);
                 setCursor(result.nextCursor);
@@ -42,7 +43,7 @@ export const InfinitePostList = ({ initialPosts, initialCursor }: InfinitePostLi
         } finally {
             setIsLoading(false);
         }
-    }, [cursor, isLoading, hasMore]);
+    }, [cursor, isLoading, hasMore, filter]);
 
     useEffect(() => {
         if (inView && hasMore && !isLoading) {

@@ -10,7 +10,10 @@
   --border: rgba(255, 255, 255, 0.08);
   --card: rgba(15, 23, 42, 0.4);
   --radius: 24px;
-  --accent-glow: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.15), transparent);
+  --accent-glow: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.2), transparent);
+  --tech-cyan: #06b6d4;
+  --tech-blue: #3b82f6;
+  --panel-bg: rgba(15, 23, 42, 0.6);
 }
 
 .dark {
@@ -126,28 +129,50 @@
 }
 
 /* Custom Utilities */
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-.mesh-bg {
-  background-image:
-    radial-gradient(at 0% 0%, hsla(217, 91%, 60%, 0.1) 0, transparent 50%),
-    radial-gradient(at 100% 0%, hsla(230, 91%, 60%, 0.1) 0, transparent 50%),
-    radial-gradient(at 50% 100%, hsla(217, 91%, 60%, 0.1) 0, transparent 50%);
-  background-attachment: fixed;
-  animation: mesh-drift 20s ease-in-out infinite alternate;
-}
-
-@keyframes mesh-drift {
-  0% {
-    background-position: 0% 0%;
+@keyframes scan {
+  from {
+    top: -10%;
   }
 
-  100% {
-    background-position: 10% 10%;
+  to {
+    top: 110%;
   }
 }
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.6);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+
+
+
+.glass-refraction {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg,
+      transparent 40%,
+      rgba(255, 255, 255, 0.05) 50%,
+      transparent 60%);
+  pointer-events: none;
+  z-index: 15;
+  mix-blend-mode: soft-light;
+}
+
+
 
 .glass-card-premium {
   background: rgba(255, 255, 255, 0.03);

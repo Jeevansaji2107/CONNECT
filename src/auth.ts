@@ -1,23 +1,26 @@
+import { CustomSupabaseAdapter } from "@/lib/custom-supabase-adapter";
+
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
-import { SupabaseAdapter } from "@auth/supabase-adapter";
 import jwt from "jsonwebtoken";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-    adapter: SupabaseAdapter({
+    adapter: CustomSupabaseAdapter({
         url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
         secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    }),
+    }) as any, // Cast to any to avoid strict type checks on our simplified adapter
     providers: [
         GitHub({
-            clientId: process.env.GITHUB_ID,
-            clientSecret: process.env.GITHUB_SECRET,
+            clientId: process.env.GITHUB_ID!,
+            clientSecret: process.env.GITHUB_SECRET!,
+            allowDangerousEmailAccountLinking: true,
         }),
         Google({
-            clientId: process.env.GOOGLE_ID,
-            clientSecret: process.env.GOOGLE_SECRET,
+            clientId: process.env.GOOGLE_ID!,
+            clientSecret: process.env.GOOGLE_SECRET!,
+            allowDangerousEmailAccountLinking: true,
         }),
         Credentials({
             name: "Demo Account",
