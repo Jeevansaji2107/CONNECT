@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Logo } from "@/components/shared/Logo";
 import Link from "next/link";
-import { Home, Compass, MessageSquare, User, Bell, LogOut, Search } from "lucide-react";
+import { Home, Compass, MessageSquare, User, Users, Bell, LogOut, Search } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { logout } from "@/lib/actions/auth-actions";
 import Image from "next/image";
@@ -21,6 +21,7 @@ export const Navbar = () => {
     const tabs = [
         { href: "/feed", icon: Home, label: "Feed" },
         { href: "/explore", icon: Compass, label: "Explore" },
+        { href: "/groups", icon: Users, label: "Groups" },
         { href: "/chat", icon: MessageSquare, label: "Chat" },
         { href: "/profile", icon: User, label: "Profile" },
     ];

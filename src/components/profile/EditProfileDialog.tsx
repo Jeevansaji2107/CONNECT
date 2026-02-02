@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Camera, Check, Loader2 } from "lucide-react";
+import { X, Camera, Check, Loader2, MapPin } from "lucide-react";
 import { User } from "@/lib/types";
-import { updateProfile } from "@/lib/actions/user-actions";
+import { updateUserProfile } from "@/lib/actions/user-actions";
 import { toast } from "sonner";
 import Image from "next/image";
 
@@ -28,7 +28,7 @@ export const EditProfileDialog = ({ user, isOpen, onClose }: EditProfileDialogPr
 
         setIsSaving(true);
         try {
-            const res = await updateProfile({ name, bio, image });
+            const res = await updateUserProfile({ name, bio, image });
             if (res.success) {
                 toast.success("Profile Synchronized");
                 onClose();
@@ -239,13 +239,14 @@ export const EditProfileDialog = ({ user, isOpen, onClose }: EditProfileDialogPr
                                         />
                                     </motion.div>
 
+
                                     <motion.div variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }} className="space-y-1 pb-2">
                                         <label className="text-[9px] font-black uppercase tracking-widest text-primary/60 text-center block">Bio Transmission</label>
                                         <textarea
                                             value={bio}
                                             onChange={(e) => setBio(e.target.value)}
                                             placeholder="Tell the grid..."
-                                            rows={3}
+                                            rows={2}
                                             className="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-primary/50 focus:bg-white/10 transition-all font-medium resize-none text-foreground text-center"
                                         />
                                     </motion.div>

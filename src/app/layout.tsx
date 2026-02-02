@@ -7,6 +7,9 @@ import { Toaster } from "sonner";
 import { NotificationListener } from "@/components/shared/NotificationListener";
 import { auth } from "@/auth";
 import { BackgroundEngine } from "@/components/shared/BackgroundEngine";
+import { SilenceModeWrapper } from "@/components/wellbeing/SilenceModeWrapper";
+
+export const dynamic = "force-dynamic";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,6 +42,7 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <SessionProvider session={session}>
+          <SilenceModeWrapper />
           <BackgroundEngine />
           <Navbar />
           <main className="min-h-screen pt-16">

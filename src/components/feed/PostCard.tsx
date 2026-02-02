@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { MoreHorizontal, MessageSquare, Share2, Heart, Trash2, Bookmark, Eye, EyeOff, Lock, Smile, Check } from "lucide-react";
+import { MoreHorizontal, MessageSquare, Share2, Heart, Trash2, Bookmark, Eye, EyeOff, Lock, Smile, Check, MapPin } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import Image from "next/image";
 import { useState, useEffect } from "react";

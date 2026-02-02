@@ -126,15 +126,15 @@ export async function searchUsers(query: string) {
     }
 }
 
-export async function updateProfile({ name, bio, image }: { name?: string, bio?: string, image?: string }) {
+export async function updateUserProfile(data: { name?: string; bio?: string; image?: string }) {
     const session = await auth();
     if (!session?.user?.id) throw new Error("Unauthorized");
 
     try {
         const updates: any = { updated_at: new Date().toISOString() };
-        if (name !== undefined) updates.name = name;
-        if (bio !== undefined) updates.bio = bio;
-        if (image !== undefined) updates.image = image;
+        if (data.name !== undefined) updates.name = data.name;
+        if (data.bio !== undefined) updates.bio = data.bio;
+        if (data.image !== undefined) updates.image = data.image;
 
         const { error } = await supabase
             .from("users")
@@ -154,7 +154,7 @@ export async function updateProfile({ name, bio, image }: { name?: string, bio?:
 }
 
 export async function updateBio(bio: string) {
-    return updateProfile({ bio });
+    return updateUserProfile({ bio });
 }
 
 export async function updateProfileSettings(isIndexed: boolean) {

@@ -9,10 +9,28 @@ import { loginGitHub, loginGoogle, loginDemo } from "@/lib/actions/auth-actions"
 
 export default function LoginPage() {
     const [mounted, setMounted] = useState(false);
+    const [particles, setParticles] = useState<{ x: number, y: number, opacity: number, scale: number, animateY: number, animateX: number, duration: number }[]>([]);
 
     useEffect(() => {
-        setMounted(true);
-    }, []);
+        // Deferring the particle generation and mounted state update to ensure it runs after initial render
+        // and to avoid potential hydration mismatches if window dimensions are used immediately.
+        const timeoutId = setTimeout(() => {
+            setMounted(true);
+            const newParticles = [...Array(40)].map(() => ({
+                x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
+                y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
+                opacity: Math.random() * 0.5 + 0.1,
+                scale: Math.random() * 0.5 + 0.5,
+                animateY: Math.random() * -100,
+                animateX: (Math.random() - 0.5) * 50,
+                duration: Math.random() * 10 + 10,
+            }));
+            setParticles(newParticles);
+        }, 0); // Using setTimeout(0) to push execution to the end of the current event loop cycle
+
+        // Cleanup function to clear the timeout if the component unmounts before it fires
+        return () => clearTimeout(timeoutId);
+    }, []); // Empty dependency array ensures this effect runs only once after the initial render
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-[#0F172A] via-[#020617] to-black">
@@ -20,21 +38,21 @@ export default function LoginPage() {
             {/* Animated Particles - Full Screen Fixed */}
             {mounted && (
                 <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-                    {[...Array(40)].map((_, i) => (
+                    {particles.map((p, i) => (
                         <motion.div
                             key={i}
                             initial={{
-                                x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
-                                y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
-                                opacity: Math.random() * 0.5 + 0.1,
-                                scale: Math.random() * 0.5 + 0.5,
+                                x: p.x,
+                                y: p.y,
+                                opacity: p.opacity,
+                                scale: p.scale,
                             }}
                             animate={{
-                                y: [null, Math.random() * -100],
-                                x: [null, (Math.random() - 0.5) * 50],
+                                y: [null, p.animateY],
+                                x: [null, p.animateX],
                             }}
                             transition={{
-                                duration: Math.random() * 10 + 10,
+                                duration: p.duration,
                                 repeat: Infinity,
                                 ease: "linear",
                                 repeatType: "reverse"

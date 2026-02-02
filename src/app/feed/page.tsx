@@ -4,7 +4,6 @@ import { auth } from "@/auth";
 import { type Post } from "@/lib/types";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { getPosts } from "@/lib/actions/post-actions";
-import { checkDatabase } from "@/lib/diagnostics";
 import { ShieldAlert } from "lucide-react";
 import Link from "next/link";
 
@@ -17,8 +16,6 @@ interface PageProps {
 
 export default async function FeedPage({ searchParams }: PageProps) {
     const { filter = "all" } = await searchParams;
-    const dbStatus = await checkDatabase();
-    const hasError = Object.values(dbStatus as Record<string, string>).some(v => typeof v === 'string' && !v.startsWith("OK"));
 
     const session = await auth();
     const userId = session?.user?.id;
@@ -27,7 +24,6 @@ export default async function FeedPage({ searchParams }: PageProps) {
 
     return (
         <div className="min-h-screen pt-24 pb-12 px-4 max-w-2xl mx-auto space-y-8 relative">
-            {/* ... error display ... (keep existing) */}
 
             <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <h1 className="text-3xl font-extrabold tracking-tight">

@@ -8,13 +8,28 @@ export const BackgroundEngine = () => {
     const [isMounted, setIsMounted] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
+    const [nodes, setNodes] = useState<any[]>([]);
+
     useEffect(() => {
-        setIsMounted(true);
+        const timeout = setTimeout(() => {
+            setIsMounted(true);
+            const newNodes = [...Array(20)].map(() => ({
+                x: Math.random() * 100 + "%",
+                y: Math.random() * 100 + "%",
+                duration: 10 + Math.random() * 15,
+                delay: Math.random() * 20,
+            }));
+            setNodes(newNodes);
+        }, 0);
+
         const handleMouseMove = (e: MouseEvent) => {
             setMousePos({ x: e.clientX, y: e.clientY });
         };
         window.addEventListener("mousemove", handleMouseMove);
-        return () => window.removeEventListener("mousemove", handleMouseMove);
+        return () => {
+            clearTimeout(timeout);
+            window.removeEventListener("mousemove", handleMouseMove);
+        };
     }, []);
 
     const springConfig = { damping: 25, stiffness: 150 };
@@ -36,13 +51,13 @@ export const BackgroundEngine = () => {
 
             {/* Floating Data Nodes */}
             <div className="absolute inset-0">
-                {[...Array(20)].map((_, i) => (
+                {nodes.map((node, i) => (
                     <motion.div
                         key={i}
                         className="absolute w-1 h-1 bg-primary/30 rounded-full"
                         initial={{
-                            x: Math.random() * 100 + "%",
-                            y: Math.random() * 100 + "%",
+                            x: node.x,
+                            y: node.y,
                             opacity: 0
                         }}
                         animate={{
@@ -51,9 +66,9 @@ export const BackgroundEngine = () => {
                             scale: [1, 1.5, 1],
                         }}
                         transition={{
-                            duration: 10 + Math.random() * 15,
+                            duration: node.duration,
                             repeat: Infinity,
-                            delay: Math.random() * 20,
+                            delay: node.delay,
                             ease: "linear"
                         }}
                     />

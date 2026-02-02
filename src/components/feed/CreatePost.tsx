@@ -13,9 +13,7 @@ export const CreatePost = () => {
     const { data: session } = useSession();
     const [content, setContent] = useState("");
     const [image, setImage] = useState<string | null>(null);
-    const [location, setLocation] = useState("");
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-    const [showLocationInput, setShowLocationInput] = useState(false);
     const [visibility, setVisibility] = useState<"public" | "followers" | "private">("public");
     const [showVisibilityMenu, setShowVisibilityMenu] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
@@ -45,14 +43,10 @@ export const CreatePost = () => {
 
         setIsUploading(true);
         try {
-            // Include location in content for now if schema doesn't support it directly
-            const postContent = location ? `${content}\n\n📍 ${location}` : content;
-            const result = await createPost(postContent, image ? [image] : [], visibility);
+            const result = await createPost(content, image ? [image] : [], visibility);
             if (result.success) {
                 setContent("");
                 setImage(null);
-                setLocation("");
-                setShowLocationInput(false);
                 toast.success("Post created successfully!");
             } else {
                 toast.error(result.error || "Failed to create post");
@@ -154,26 +148,6 @@ export const CreatePost = () => {
                             </AnimatePresence>
                         </div>
 
-                        {showLocationInput && (
-                            <motion.div
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className="flex items-center space-x-2 text-xs text-primary font-bold bg-primary/5 p-2 rounded-lg border border-primary/10 mt-2"
-                            >
-                                <MapPin className="w-3 h-3" />
-                                <input
-                                    type="text"
-                                    value={location}
-                                    onChange={(e) => setLocation(e.target.value)}
-                                    placeholder="Enter location..."
-                                    className="bg-transparent border-none outline-none flex-1 placeholder:text-primary/40 uppercase tracking-widest"
-                                    autoFocus
-                                />
-                                <button type="button" onClick={() => { setLocation(""); setShowLocationInput(false); }}>
-                                    <X className="w-3 h-3" />
-                                </button>
-                            </motion.div>
-                        )}
                     </div>
                 </div>
 
@@ -235,13 +209,6 @@ export const CreatePost = () => {
                             className={`p-2.5 rounded-full transition-all ${showEmojiPicker ? "bg-primary text-white" : "text-muted hover:bg-secondary"}`}
                         >
                             <Smile className="w-5 h-5" />
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setShowLocationInput(!showLocationInput)}
-                            className={`p-2.5 rounded-full transition-all ${showLocationInput ? "bg-primary text-white" : "text-muted hover:bg-secondary"}`}
-                        >
-                            <MapPin className="w-5 h-5" />
                         </button>
                         <input
                             type="file"
