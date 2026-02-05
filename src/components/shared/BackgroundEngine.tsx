@@ -1,82 +1,74 @@
 "use client";
 
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
-import { useEffect, useState, useRef } from "react";
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
 export const BackgroundEngine = () => {
-    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
     const [isMounted, setIsMounted] = useState(false);
-    const containerRef = useRef<HTMLDivElement>(null);
-
-    const [nodes, setNodes] = useState<any[]>([]);
 
     useEffect(() => {
-        const timeout = setTimeout(() => {
-            setIsMounted(true);
-            const newNodes = [...Array(20)].map(() => ({
-                x: Math.random() * 100 + "%",
-                y: Math.random() * 100 + "%",
-                duration: 10 + Math.random() * 15,
-                delay: Math.random() * 20,
-            }));
-            setNodes(newNodes);
-        }, 0);
-
-        const handleMouseMove = (e: MouseEvent) => {
-            setMousePos({ x: e.clientX, y: e.clientY });
-        };
-        window.addEventListener("mousemove", handleMouseMove);
-        return () => {
-            clearTimeout(timeout);
-            window.removeEventListener("mousemove", handleMouseMove);
-        };
+        setIsMounted(true);
     }, []);
-
-    const springConfig = { damping: 25, stiffness: 150 };
-    const mouseXSpring = useSpring(mousePos.x, springConfig);
-    const mouseYSpring = useSpring(mousePos.y, springConfig);
 
     if (!isMounted) return null;
 
     return (
-        <div ref={containerRef} className="fixed inset-0 pointer-events-none z-[-1] overflow-hidden bg-[#020617]">
-            {/* Interactive Grid */}
-            <motion.div
-                className="absolute inset-0 opacity-[0.1]"
-                style={{
-                    backgroundImage: `radial-gradient(circle at ${mouseXSpring}px ${mouseYSpring}px, var(--primary) 0%, transparent 60%), linear-gradient(to right, var(--border) 1px, transparent 1px), linear-gradient(to bottom, var(--border) 1px, transparent 1px)`,
-                    backgroundSize: "100% 100%, 40px 40px, 40px 40px",
-                }}
-            />
+        <div className="fixed inset-0 pointer-events-none z-[-1] overflow-hidden bg-[#020617]">
+            {/* Ambient Background Glows */}
+            <div className="absolute inset-0 opacity-40">
+                {/* Top Left - Purple */}
+                <motion.div
+                    className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] rounded-full bg-violet-600/20 blur-[120px]"
+                    animate={{
+                        scale: [1, 1.2, 1],
+                        x: [0, 50, 0],
+                        y: [0, 30, 0],
+                    }}
+                    transition={{
+                        duration: 20,
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                        ease: "easeInOut",
+                    }}
+                />
 
-            {/* Floating Data Nodes */}
-            <div className="absolute inset-0">
-                {nodes.map((node, i) => (
-                    <motion.div
-                        key={i}
-                        className="absolute w-1 h-1 bg-primary/30 rounded-full"
-                        initial={{
-                            x: node.x,
-                            y: node.y,
-                            opacity: 0
-                        }}
-                        animate={{
-                            y: ["-10%", "110%"],
-                            opacity: [0, 1, 1, 0],
-                            scale: [1, 1.5, 1],
-                        }}
-                        transition={{
-                            duration: node.duration,
-                            repeat: Infinity,
-                            delay: node.delay,
-                            ease: "linear"
-                        }}
-                    />
-                ))}
+                {/* Bottom Right - Blue */}
+                <motion.div
+                    className="absolute -bottom-[10%] -right-[10%] w-[50%] h-[50%] rounded-full bg-blue-600/20 blur-[120px]"
+                    animate={{
+                        scale: [1, 1.1, 1],
+                        x: [0, -30, 0],
+                        y: [0, -50, 0],
+                    }}
+                    transition={{
+                        duration: 25,
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                        ease: "easeInOut",
+                    }}
+                />
+
+                {/* Center/Random - Cyan Accent */}
+                <motion.div
+                    className="absolute top-[30%] right-[30%] w-[30%] h-[30%] rounded-full bg-cyan-600/10 blur-[100px]"
+                    animate={{
+                        scale: [1, 1.3, 1],
+                        x: [0, -40, 0],
+                        y: [0, 40, 0],
+                    }}
+                    transition={{
+                        duration: 18,
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                        ease: "easeInOut",
+                    }}
+                />
             </div>
 
-            {/* Noise Layer */}
-            <div className="absolute inset-0 opacity-[0.02] mix-blend-overlay pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+            {/* Subtle Texture - Minimal Grain */}
+            <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
+            />
         </div>
     );
 };
