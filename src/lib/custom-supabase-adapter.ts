@@ -16,7 +16,6 @@ export function CustomSupabaseAdapter(options: { url: string; secret: string }) 
 
     return {
         async createUser(user: any) {
-            console.log("[CustomAdapter] createUser", user)
             const { data, error } = await supabase
                 .from("users")
                 .insert({
@@ -29,14 +28,12 @@ export function CustomSupabaseAdapter(options: { url: string; secret: string }) 
                 .single()
 
             if (error) {
-                console.error("[CustomAdapter] createUser Error", error)
                 throw error
             }
             return formatUser(data)
         },
 
         async getUser(id: string) {
-            // console.log("[CustomAdapter] getUser", id)
             const { data, error } = await supabase
                 .from("users")
                 .select("*")
@@ -48,7 +45,6 @@ export function CustomSupabaseAdapter(options: { url: string; secret: string }) 
         },
 
         async getUserByEmail(email: string) {
-            // console.log("[CustomAdapter] getUserByEmail", email)
             const { data, error } = await supabase
                 .from("users")
                 .select("*")
@@ -60,7 +56,6 @@ export function CustomSupabaseAdapter(options: { url: string; secret: string }) 
         },
 
         async getUserByAccount({ provider, providerAccountId }: any) {
-            // console.log("[CustomAdapter] getUserByAccount", provider, providerAccountId)
             const { data: account, error } = await supabase
                 .from("accounts")
                 .select("user_id")
@@ -81,7 +76,6 @@ export function CustomSupabaseAdapter(options: { url: string; secret: string }) 
         },
 
         async updateUser(user: any) {
-            console.log("[CustomAdapter] updateUser", user)
             const { data, error } = await supabase
                 .from("users")
                 .update({
@@ -100,12 +94,10 @@ export function CustomSupabaseAdapter(options: { url: string; secret: string }) 
         },
 
         async deleteUser(userId: string) {
-            console.log("[CustomAdapter] deleteUser", userId)
             await supabase.from("users").delete().eq("id", userId)
         },
 
         async linkAccount(account: any) {
-            console.log("[CustomAdapter] linkAccount", account)
             const { error } = await supabase.from("accounts").insert({
                 user_id: account.userId,
                 type: account.type,
@@ -120,7 +112,6 @@ export function CustomSupabaseAdapter(options: { url: string; secret: string }) 
                 session_state: account.session_state,
             })
             if (error) {
-                console.error("[CustomAdapter] linkAccount Error", error)
                 throw error
             }
             return account
@@ -135,7 +126,6 @@ export function CustomSupabaseAdapter(options: { url: string; secret: string }) 
         },
 
         async createSession({ sessionToken, userId, expires }: any) {
-            console.log("[CustomAdapter] createSession", userId)
             const { data, error } = await supabase
                 .from("sessions")
                 .insert({
@@ -147,14 +137,12 @@ export function CustomSupabaseAdapter(options: { url: string; secret: string }) 
                 .single()
 
             if (error) {
-                console.error("[CustomAdapter] createSession Error", error)
                 throw error
             }
             return formatSession(data)
         },
 
         async getSessionAndUser(sessionToken: string) {
-            // console.log("[CustomAdapter] getSessionAndUser", sessionToken)
             const { data: session, error } = await supabase
                 .from("sessions")
                 .select("*")
@@ -178,7 +166,6 @@ export function CustomSupabaseAdapter(options: { url: string; secret: string }) 
         },
 
         async updateSession({ sessionToken }: any) {
-            console.log("[CustomAdapter] updateSession", sessionToken)
             // We don't really support updating sessions in this simple adapter 
             // other than maybe expiry, but NextAuth often tries to update it.
             // We'll read it back.
@@ -192,7 +179,6 @@ export function CustomSupabaseAdapter(options: { url: string; secret: string }) 
         },
 
         async deleteSession(sessionToken: string) {
-            console.log("[CustomAdapter] deleteSession", sessionToken)
             await supabase.from("sessions").delete().eq("session_token", sessionToken)
         },
     }

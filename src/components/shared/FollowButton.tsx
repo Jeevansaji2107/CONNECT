@@ -14,6 +14,7 @@ interface FollowButtonProps {
 export const FollowButton = ({ userId, initialIsFollowing = false, className = "" }: FollowButtonProps) => {
     const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
     const [isLoading, setIsLoading] = useState(false);
+    const [shake, setShake] = useState(false);
 
     const handleFollow = async (e: React.MouseEvent) => {
         e.preventDefault();
@@ -21,6 +22,7 @@ export const FollowButton = ({ userId, initialIsFollowing = false, className = "
 
         setIsLoading(true);
         // Optimistic update
+        const previousState = isFollowing;
         setIsFollowing(!isFollowing);
 
         try {
@@ -30,12 +32,30 @@ export const FollowButton = ({ userId, initialIsFollowing = false, className = "
                 setIsFollowing(!!result.followed);
             } else {
                 // Rollback
-                setIsFollowing(isFollowing);
-                toast.error(result.error || "Failed to update follow status");
+                setIsFollowing(previousState);
+
+                if (result.error === "You cannot follow yourself") {
+                    setShake(true);
+                    toast.error("HEY ARE U DUMB!", {
+                        description: "You cannot follow yourself.",
+                        duration: 3000,
+                    });
+                    setTimeout(() => setShake(false), 500);
+                } else {
+                    toast.error(result.error || "Failed to update follow status");
+                }
             }
-        } catch (error) {
-            setIsFollowing(isFollowing);
-            toast.error("An unexpected error occurred");
+        } catch (error: any) {
+            setIsFollowing(previousState);
+            if (error.message === "You cannot follow yourself") {
+                setShake(true);
+                toast.error("HEY ARE U DUMB!", {
+                    description: "You cannot follow yourself.",
+                });
+                setTimeout(() => setShake(false), 500);
+            } else {
+                toast.error("An unexpected error occurred");
+            }
         } finally {
             setIsLoading(false);
         }
@@ -45,9 +65,10 @@ export const FollowButton = ({ userId, initialIsFollowing = false, className = "
         <button
             onClick={handleFollow}
             disabled={isLoading}
-            className={`flex items-center space-x-2 px-4 py-1.5 rounded-full text-xs font-bold transition-all disabled:opacity-50 ${isFollowing
-                ? "bg-secondary text-foreground hover:bg-red-50 hover:text-red-600 hover:border-red-100 border border-transparent"
-                : "bg-primary text-white hover:bg-primary-hover shadow-sm"
+            className={`flex items-center space-x-2 px-4 py-1.5 rounded-full text-xs font-bold transition-all disabled:opacity-50 ${shake ? "animate-shake bg-red-500 text-white" : ""
+                } ${isFollowing
+                    ? "bg-secondary text-foreground hover:bg-red-50 hover:text-red-600 hover:border-red-100 border border-transparent"
+                    : "bg-primary text-white hover:bg-primary-hover shadow-sm"
                 } ${className}`}
         >
             {isLoading ? (

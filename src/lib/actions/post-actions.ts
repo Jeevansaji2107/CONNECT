@@ -418,3 +418,118 @@ export async function searchPosts(query: string) {
         return { success: false, error: "Failed to search posts" };
     }
 }
+
+export async function getBookmarkedPosts() {
+    const session = await auth();
+    const userId = session?.user?.id;
+    if (!userId) return { success: false, error: "Unauthorized" };
+
+    try {
+        const { data: bookmarks, error } = await supabase
+            .from("bookmarks")
+            .select(`
+                post_id,
+                post:posts (
+                    *,
+                    author:users (id, name, email, image),
+                    likes (user_id),
+                    comments (count)
+                )
+            `)
+            .eq("user_id", userId)
+            .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        // Follows check
+        let followingIds: string[] = [];
+        if (userId) {
+            const { data: follows } = await supabase
+                .from("follows")
+                .select("following_id")
+                .eq("follower_id", userId);
+            followingIds = (follows || []).map(f => f.following_id);
+        }
+
+        const formattedPosts = (bookmarks || [])
+            .filter((b) => b.post) // Ensure post exists
+            // @ts-ignore
+            .map((b) => b.post)
+            .map((post: any) => ({
+                ...post,
+                mediaUrls: post.media_urls,
+                createdAt: new Date(post.created_at).toISOString(),
+                updatedAt: new Date(post.updated_at).toISOString(),
+                likes: post.likes || [],
+                _count: {
+                    likes: post.likes?.length || 0,
+                    comments: post.comments?.[0]?.count || 0
+                },
+                isLikedInitial: post.likes?.some((l: { user_id: string }) => l.user_id === userId),
+                isFollowingAuthorInitial: followingIds.includes(post.author_id),
+                isBookmarkedInitial: true
+            }));
+
+        return { success: true, posts: formattedPosts };
+    } catch (error) {
+        console.error("Failed to fetch bookmarks:", error);
+        return { success: false, error: "Failed to fetch bookmarks" };
+    }
+}
+
+export async function getLikedPosts() {
+    const session = await auth();
+    const userId = session?.user?.id;
+    if (!userId) return { success: false, error: "Unauthorized" };
+
+    try {
+        const { data: likes, error } = await supabase
+            .from("likes")
+            .select(`
+                post_id,
+                post:posts (
+                    *,
+                    author:users (id, name, email, image),
+                    likes (user_id),
+                    comments (count)
+                )
+            `)
+            .eq("user_id", userId)
+            .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        // Follows check
+        let followingIds: string[] = [];
+        if (userId) {
+            const { data: follows } = await supabase
+                .from("follows")
+                .select("following_id")
+                .eq("follower_id", userId);
+            followingIds = (follows || []).map(f => f.following_id);
+        }
+
+        const formattedPosts = (likes || [])
+            .filter((l) => l.post) // Ensure post exists
+            // @ts-ignore
+            .map((l) => l.post)
+            .map((post: any) => ({
+                ...post,
+                mediaUrls: post.media_urls,
+                createdAt: new Date(post.created_at).toISOString(),
+                updatedAt: new Date(post.updated_at).toISOString(),
+                likes: post.likes || [],
+                _count: {
+                    likes: post.likes?.length || 0,
+                    comments: post.comments?.[0]?.count || 0
+                },
+                isLikedInitial: true,
+                isFollowingAuthorInitial: followingIds.includes(post.author_id)
+            }));
+
+        return { success: true, posts: formattedPosts };
+    } catch (error) {
+        console.error("Failed to fetch liked posts:", error);
+        return { success: false, error: "Failed to fetch liked posts" };
+    }
+}

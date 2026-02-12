@@ -11,12 +11,15 @@ import { usePathname } from "next/navigation";
 import { SearchInput } from "@/components/explore/SearchInput";
 import { useChatStore } from "@/lib/store";
 
+import { NotificationDropdown } from "@/components/shared/NotificationDropdown";
+import { useState } from "react";
 
 export const Navbar = () => {
     const { data: session } = useSession();
     const pathname = usePathname();
     const unreadCount = useChatStore((state) => state.unreadCount);
     const isPersonalUser = session?.user?.email?.toLowerCase().includes("jeevansaji2107");
+    const [showNotifications, setShowNotifications] = useState(false);
 
     const tabs = [
         { href: "/feed", icon: Home, label: "Feed" },
@@ -121,7 +124,8 @@ export const Navbar = () => {
 
                                 <div className="relative">
                                     <button
-                                        className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-full transition-all"
+                                        onClick={() => setShowNotifications(!showNotifications)}
+                                        className={`p-2 rounded-full transition-all ${showNotifications ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-primary hover:bg-primary/5"}`}
                                         title="Notifications"
                                     >
                                         <Bell className="w-5 h-5" />
@@ -129,6 +133,7 @@ export const Navbar = () => {
                                             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-background" />
                                         )}
                                     </button>
+                                    <NotificationDropdown isOpen={showNotifications} onClose={() => setShowNotifications(false)} />
                                 </div>
 
                                 <button

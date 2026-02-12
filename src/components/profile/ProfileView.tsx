@@ -17,10 +17,12 @@ import { useSession } from "next-auth/react";
 interface ProfileViewProps {
     user: User & { _count: { followers: number, following: number } };
     posts: Post[];
+    bookmarkedPosts?: Post[];
+    likedPosts?: Post[]; // Added prop
     userId: string;
 }
 
-export const ProfileView = ({ user, posts, userId }: ProfileViewProps) => {
+export const ProfileView = ({ user, posts, bookmarkedPosts = [], likedPosts = [], userId }: ProfileViewProps) => {
     const { data: session } = useSession();
     const [activeTab, setActiveTab] = useState("posts");
     const [isEditOpen, setIsEditOpen] = useState(false);
@@ -189,6 +191,18 @@ export const ProfileView = ({ user, posts, userId }: ProfileViewProps) => {
                             <motion.div layoutId="profile-active-tab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
                         )}
                     </button>
+                    {isOwnProfile && (
+                        <button
+                            onClick={() => setActiveTab("vault")}
+                            className={`flex items-center space-x-2 px-8 py-4 text-sm font-bold transition-all relative ${activeTab === "vault" ? "text-primary" : "text-muted hover:text-foreground"}`}
+                        >
+                            <Share2 className="w-4 h-4 rotate-180" />
+                            <span>Vault</span>
+                            {activeTab === "vault" && (
+                                <motion.div layoutId="profile-active-tab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                            )}
+                        </button>
+                    )}
                     <button
                         onClick={() => setActiveTab("likes")}
                         className={`flex items-center space-x-2 px-8 py-4 text-sm font-bold transition-all relative ${activeTab === "likes" ? "text-primary" : "text-muted hover:text-foreground"}`}
@@ -222,16 +236,43 @@ export const ProfileView = ({ user, posts, userId }: ProfileViewProps) => {
                                         </div>
                                     )}
                                 </motion.div>
+                            ) : activeTab === "vault" ? (
+                                <motion.div
+                                    key="vault"
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    className="space-y-6"
+                                >
+                                    {bookmarkedPosts.length > 0 ? (
+                                        bookmarkedPosts.map((post: Post) => (
+                                            <PostCard key={post.id} post={post} />
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-20 card-simple border-dashed">
+                                            <Share2 className="w-12 h-12 mx-auto mb-4 text-muted/20 rotate-180" />
+                                            <p className="text-muted font-medium">Vault is empty.</p>
+                                        </div>
+                                    )}
+                                </motion.div>
                             ) : (
                                 <motion.div
                                     key="likes"
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -10 }}
-                                    className="text-center py-20 card-simple border-dashed"
+                                    className="space-y-6"
                                 >
-                                    <Heart className="w-12 h-12 mx-auto mb-4 text-muted/20" />
-                                    <p className="text-muted font-medium">No liked posts yet.</p>
+                                    {likedPosts.length > 0 ? (
+                                        likedPosts.map((post: Post) => (
+                                            <PostCard key={post.id} post={post} />
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-20 card-simple border-dashed">
+                                            <Heart className="w-12 h-12 mx-auto mb-4 text-muted/20" />
+                                            <p className="text-muted font-medium">No liked posts yet.</p>
+                                        </div>
+                                    )}
                                 </motion.div>
                             )}
                         </AnimatePresence>

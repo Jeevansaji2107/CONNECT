@@ -2,14 +2,15 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { MoreHorizontal, MessageSquare, Share2, Heart, Trash2, Bookmark, Eye, EyeOff, Lock, Smile, Check, MapPin } from "lucide-react";
+import { MessageSquare, Repeat2, Heart, Bookmark, Eye, EyeOff, Lock, Check } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { FollowButton } from "@/components/shared/FollowButton";
-import { likePost, unlikePost, deletePost, createComment, getComments, reactToPost, toggleBookmark } from "@/lib/actions/post-actions";
+import { PostOptions } from "@/components/feed/PostOptions";
+import { likePost, deletePost, createComment, getComments, reactToPost, toggleBookmark } from "@/lib/actions/post-actions";
 import { Comment } from "@/lib/types";
 
 interface PostCardProps {
@@ -249,19 +250,11 @@ export const PostCard = ({ post, isFollowingAuthorInitial = false, className = "
                                 <span>{post.visibility}</span>
                             </div>
                         )}
-                        {isOwner ? (
-                            <button
-                                onClick={handleDelete}
-                                disabled={isDeleting}
-                                className="p-2 text-muted hover:text-red-500 hover:bg-red-500/5 rounded-full transition-all"
-                            >
-                                <Trash2 className="w-4.5 h-4.5" />
-                            </button>
-                        ) : (
-                            <button className="p-2 text-muted hover:text-foreground hover:bg-secondary rounded-full transition-all">
-                                <MoreHorizontal className="w-5 h-5" />
-                            </button>
-                        )}
+                        <PostOptions
+                            isOwner={isOwner || false}
+                            postId={id}
+                            onDelete={isOwner ? handleDelete : undefined}
+                        />
                     </div>
                 </div>
 
@@ -293,16 +286,17 @@ export const PostCard = ({ post, isFollowingAuthorInitial = false, className = "
                             <AnimatePresence>
                                 {showReactions && (
                                     <motion.div
-                                        initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                                        animate={{ opacity: 1, y: -45, scale: 1 }}
-                                        exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                                        initial={{ opacity: 0, x: -10, scale: 0.9 }}
+                                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                                        exit={{ opacity: 0, x: -10, scale: 0.9 }}
                                         onMouseLeave={() => setShowReactions(false)}
-                                        className="absolute left-0 bottom-full mb-2 bg-card border border-border rounded-full p-1.5 shadow-2xl flex items-center space-x-2 z-50 whitespace-nowrap"
+                                        className="absolute left-full top-1/2 -translate-y-1/2 ml-2 bg-card border border-border rounded-full p-1.5 shadow-2xl flex items-center space-x-2 z-50 whitespace-nowrap"
                                     >
                                         {reactions.map((emoji) => (
                                             <button
                                                 key={emoji}
                                                 onClick={() => handleReaction(emoji)}
+                                                onMouseDown={(e) => e.stopPropagation()} // Prevent card click
                                                 className="hover:scale-125 transition-transform p-1.5 text-lg"
                                             >
                                                 {emoji}
@@ -324,8 +318,12 @@ export const PostCard = ({ post, isFollowingAuthorInitial = false, className = "
                             <span className="text-xs font-semibold">{post._count?.comments || 0}</span>
                         </button>
 
-                        <button className="flex items-center space-x-2 text-muted hover:text-primary transition-all">
-                            <Share2 className="w-5 h-5" />
+                        <button
+                            onClick={() => toast.success("Reposted to your feed")}
+                            className="flex items-center space-x-2 text-muted hover:text-green-500 transition-all"
+                            title="Repost"
+                        >
+                            <Repeat2 className="w-5 h-5" />
                         </button>
                     </div>
 
