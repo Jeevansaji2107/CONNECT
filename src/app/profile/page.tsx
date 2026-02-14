@@ -40,6 +40,16 @@ export default async function ProfilePage() {
         .eq("author_id", userId)
         .order("created_at", { ascending: false });
 
+    // Fetch bookmarks and likes
+    const { getBookmarkedPosts, getLikedPosts } = await import("@/lib/actions/post-actions");
+    const [bookmarksRes, likesRes] = await Promise.all([
+        getBookmarkedPosts(),
+        getLikedPosts()
+    ]);
+
+    const bookmarkedPosts = bookmarksRes.success ? bookmarksRes.posts : [];
+    const likedPosts = likesRes.success ? likesRes.posts : [];
+
     // Format user data for serialized transfer
     const formattedUser = {
         ...user,
@@ -50,19 +60,25 @@ export default async function ProfilePage() {
         }
     };
 
-    const formattedPosts = (posts || []).map((post) => ({
+    const formatPost = (post: any) => ({
         ...post,
+        image: post.media_urls?.[0] || post.image || null,
         mediaUrls: post.media_urls,
         createdAt: new Date(post.created_at).toISOString(),
         updatedAt: new Date(post.updated_at).toISOString(),
         likes: post.likes || [],
-        isLikedInitial: post.likes?.some((l: { user_id: string }) => l.user_id === userId),
+        isLikedInitial: post.isLikedInitial ?? post.likes?.some((l: { user_id: string }) => l.user_id === userId),
+        isBookmarkedInitial: post.isBookmarkedInitial ?? false,
         isFollowingAuthorInitial: false,
         _count: {
             likes: post.likes?.length || 0,
             comments: post.comments?.[0]?.count || 0
         }
-    }));
+    });
+
+    const formattedPosts = (posts || []).map(formatPost);
+    const formattedBookmarks = bookmarkedPosts.map(formatPost);
+    const formattedLikes = likedPosts.map(formatPost);
 
     // Inject requested car posts if user is Maddy
     if (user.email === "maddy@connect.social") {
@@ -94,7 +110,13 @@ export default async function ProfilePage() {
 
     return (
         <div className="max-w-[1400px] mx-auto px-4 py-8">
-            <ProfileView user={formattedUser} posts={formattedPosts} userId={userId} />
+            <ProfileView
+                user={formattedUser}
+                posts={formattedPosts}
+                bookmarkedPosts={formattedBookmarks}
+                likedPosts={formattedLikes}
+                userId={userId}
+            />
         </div>
     );
 }

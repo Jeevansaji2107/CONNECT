@@ -7,10 +7,11 @@ import Credentials from "next-auth/providers/credentials";
 import jwt from "jsonwebtoken";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+    trustHost: true,
     adapter: CustomSupabaseAdapter({
-        url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    }) as any, // Cast to any to avoid strict type checks on our simplified adapter
+        url: process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+        secret: process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+    }) as any,
     providers: [
         GitHub({
             clientId: process.env.GITHUB_ID!,

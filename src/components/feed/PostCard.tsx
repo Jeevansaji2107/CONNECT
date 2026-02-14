@@ -12,6 +12,9 @@ import { FollowButton } from "@/components/shared/FollowButton";
 import { PostOptions } from "@/components/feed/PostOptions";
 import { likePost, deletePost, createComment, getComments, reactToPost, toggleBookmark } from "@/lib/actions/post-actions";
 import { Comment } from "@/lib/types";
+import { useUIStore } from "@/lib/store";
+import { DecryptedText } from "@/components/shared/DecryptedText";
+import { CyberPulse } from "@/components/shared/CyberPulse";
 
 interface PostCardProps {
     post: {
@@ -40,8 +43,11 @@ interface PostCardProps {
 
 export const PostCard = ({ post, isFollowingAuthorInitial = false, className = "" }: PostCardProps) => {
     const { data: session } = useSession();
-
+    const setExpandedPostId = useUIStore((state) => state.setExpandedPostId);
+    const onlineUsers = useUIStore((state) => state.onlineUsers);
     const { id, content, image, createdAt, author, authorId } = post || {};
+    const isOnline = onlineUsers.includes(authorId);
+
     const authorName = (author?.email?.toLowerCase() === "maddy@connect.social" || author?.name === "Nexus Explorer" || !author?.name) ? "Maddy" : (author?.email?.toLowerCase().includes("jeevansaji2107")) ? "JEEVAN SAJI" : author.name;
     const isOwner = session?.user?.id === authorId;
 
@@ -79,35 +85,54 @@ export const PostCard = ({ post, isFollowingAuthorInitial = false, className = "
     const handleReaction = async (emoji: string) => {
         if (!session) return toast.error("Please sign in to react");
         setShowReactions(false);
+
+        // Optimistic Update
+        const wasLiked = isLiked;
+        const previousCount = likesCount;
+
+        setIsLiked(true);
+        if (!wasLiked) setLikesCount(prev => prev + 1);
+        setBurstEmoji(emoji);
+        setIsBurstActive(true);
+
         try {
             const result = await reactToPost(id, emoji);
             if (result.success) {
                 toast.success("Reaction Synchronized");
-                if (!isLiked) {
-                    setIsLiked(true);
-                    setLikesCount(prev => prev + 1);
-                }
-                setBurstEmoji(emoji);
-                setIsBurstActive(true);
+            } else {
+                // Revert
+                setIsLiked(wasLiked);
+                setLikesCount(previousCount);
+                toast.error("Reaction synchronization failed");
             }
         } catch (error) {
+            // Revert
+            setIsLiked(wasLiked);
+            setLikesCount(previousCount);
             toast.error("Reaction failed");
         }
     };
 
     const handleBookmark = async () => {
         if (!session) return toast.error("Please sign in to save posts");
-        const current = isBookmarked;
-        setIsBookmarked(!current);
+        const wasBookmarked = isBookmarked;
+
+        // Optimistic Update
+        setIsBookmarked(!wasBookmarked);
+
         try {
             const result = await toggleBookmark(id);
             if (result.success) {
                 toast.success(result.bookmarked ? "Archived to Vault" : "Removed from Vault");
             } else {
-                setIsBookmarked(current);
+                // Revert
+                setIsBookmarked(wasBookmarked);
+                toast.error("Vault synchronization failed");
             }
         } catch (error) {
-            setIsBookmarked(current);
+            // Revert
+            setIsBookmarked(wasBookmarked);
+            toast.error("Vault access interrupted");
         }
     };
 
@@ -175,7 +200,8 @@ export const PostCard = ({ post, isFollowingAuthorInitial = false, className = "
 
     return (
         <motion.div
-            layout
+            layoutId={`post-card-${id}`}
+            onClick={() => setExpandedPostId(id)}
             initial={{ opacity: 0, scale: 0.9, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
@@ -186,7 +212,7 @@ export const PostCard = ({ post, isFollowingAuthorInitial = false, className = "
                 mass: 1
             }}
             onMouseMove={handleMouseMove}
-            className={`group/card card-simple p-6 ${className} relative overflow-hidden`}
+            className={`group/card card-simple p-6 ${className} relative overflow-hidden cursor-pointer`}
         >
             {/* Spotlight Gradient */}
             <div
@@ -219,12 +245,13 @@ export const PostCard = ({ post, isFollowingAuthorInitial = false, className = "
                                         {authorName?.[0] || "?"}
                                     </div>
                                 )}
+                                <CyberPulse isOnline={isOnline} className="absolute bottom-0 right-0 w-3 h-3 z-20" />
                             </div>
                         </Link>
                         <div>
                             <div className="flex items-center space-x-2">
                                 <Link href={`/profile/${author.id}`} className="font-bold text-foreground hover:text-primary transition-colors flex items-center gap-1">
-                                    {authorName}
+                                    <DecryptedText text={authorName} animateOnMount={true} speed={30} maxIterations={12} />
                                     {(author.email === "maddy@connect.social" || author.email === "jeevansaji2107@gmail.com") && (
                                         <Check className="w-3 h-3 text-primary fill-primary/10" strokeWidth={3} />
                                     )}

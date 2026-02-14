@@ -8,6 +8,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { createPost } from "@/lib/actions/post-actions";
 import { Logo } from "@/components/shared/Logo";
+import Magnetic from "@/components/shared/Magnetic";
 
 export const CreatePost = () => {
     const { data: session } = useSession();
@@ -195,21 +196,25 @@ export const CreatePost = () => {
 
                 <div className="flex items-center justify-between pt-4 border-t border-border">
                     <div className="flex items-center space-x-2">
-                        <button
-                            type="button"
-                            onClick={() => fileInputRef.current?.click()}
-                            className="p-2.5 text-primary hover:bg-primary/10 rounded-full transition-all"
-                            title="Add Image"
-                        >
-                            <ImageIcon className="w-5 h-5" />
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                            className={`p-2.5 rounded-full transition-all ${showEmojiPicker ? "bg-primary text-white" : "text-muted hover:bg-secondary"}`}
-                        >
-                            <Smile className="w-5 h-5" />
-                        </button>
+                        <Magnetic>
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="p-2.5 text-primary hover:bg-primary/10 rounded-full transition-all"
+                                title="Add Image"
+                            >
+                                <ImageIcon className="w-5 h-5" />
+                            </button>
+                        </Magnetic>
+                        <Magnetic>
+                            <button
+                                type="button"
+                                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                                className={`p-2.5 rounded-full transition-all ${showEmojiPicker ? "bg-primary text-white" : "text-muted hover:bg-secondary"}`}
+                            >
+                                <Smile className="w-5 h-5" />
+                            </button>
+                        </Magnetic>
                         <input
                             type="file"
                             ref={fileInputRef}
@@ -218,13 +223,15 @@ export const CreatePost = () => {
                             className="hidden"
                         />
                     </div>
-                    <button
-                        type="submit"
-                        disabled={isUploading || (!content.trim() && !image)}
-                        className="btn-primary py-2 px-8 font-bold"
-                    >
-                        {isUploading ? "Posting..." : "Post"}
-                    </button>
+                    <Magnetic>
+                        <button
+                            type="submit"
+                            disabled={isUploading || (!content.trim() && !image)}
+                            className="btn-primary py-2 px-8 font-bold"
+                        >
+                            {isUploading ? "Posting..." : "Post"}
+                        </button>
+                    </Magnetic>
                 </div>
             </form>
         </motion.div>

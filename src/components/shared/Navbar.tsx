@@ -13,6 +13,9 @@ import { useChatStore } from "@/lib/store";
 
 import { NotificationDropdown } from "@/components/shared/NotificationDropdown";
 import { useState } from "react";
+import Magnetic from "@/components/shared/Magnetic";
+import { DecryptedText } from "@/components/shared/DecryptedText";
+import { CyberPulse } from "@/components/shared/CyberPulse";
 
 export const Navbar = () => {
     const { data: session } = useSession();
@@ -53,7 +56,15 @@ export const Navbar = () => {
                                         }`}
                                 >
                                     <Icon className="w-4 h-4 z-10" />
-                                    <span className="z-10">{tab.label}</span>
+                                    <span className="z-10">
+                                        <DecryptedText
+                                            text={tab.label}
+                                            animateOnMount={false}
+                                            useHover={true}
+                                            speed={40}
+                                            maxIterations={8}
+                                        />
+                                    </span>
                                     {/* Shimmer Effect */}
                                     <div className="absolute inset-0 rounded-full overflow-hidden opacity-0 group-hover/nav:opacity-100 transition-opacity">
                                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent -translate-x-full group-hover/nav:animate-[shimmer_2s_infinite]" />
@@ -86,7 +97,7 @@ export const Navbar = () => {
                             <div className="flex items-center space-x-3">
                                 <Link
                                     href={`/profile/${session.user.id}`}
-                                    className="flex items-center space-x-2 p-1 pr-4 rounded-full border border-border hover:bg-secondary transition-all"
+                                    className="flex items-center space-x-2 p-1 pr-4 rounded-full border border-border hover:bg-secondary transition-all group/profile"
                                 >
                                     <div className="relative w-8 h-8 rounded-full overflow-hidden bg-secondary border border-white/5">
                                         {(session.user.email?.toLowerCase() === "maddy@connect.social") ? (
@@ -123,26 +134,30 @@ export const Navbar = () => {
                                 </Link>
 
                                 <div className="relative">
-                                    <button
-                                        onClick={() => setShowNotifications(!showNotifications)}
-                                        className={`p-2 rounded-full transition-all ${showNotifications ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-primary hover:bg-primary/5"}`}
-                                        title="Notifications"
-                                    >
-                                        <Bell className="w-5 h-5" />
-                                        {unreadCount > 0 && (
-                                            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-background" />
-                                        )}
-                                    </button>
+                                    <Magnetic>
+                                        <button
+                                            onClick={() => setShowNotifications(!showNotifications)}
+                                            className={`p-2 rounded-full transition-all ${showNotifications ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-primary hover:bg-primary/5"}`}
+                                            title="Notifications"
+                                        >
+                                            <Bell className="w-5 h-5" />
+                                            {unreadCount > 0 && (
+                                                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-background" />
+                                            )}
+                                        </button>
+                                    </Magnetic>
                                     <NotificationDropdown isOpen={showNotifications} onClose={() => setShowNotifications(false)} />
                                 </div>
 
-                                <button
-                                    onClick={() => logout()}
-                                    className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/5 rounded-full transition-all"
-                                    title="Sign Out"
-                                >
-                                    <LogOut className="w-4.5 h-4.5" />
-                                </button>
+                                <Magnetic>
+                                    <button
+                                        onClick={() => logout()}
+                                        className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/5 rounded-full transition-all"
+                                        title="Sign Out"
+                                    >
+                                        <LogOut className="w-4.5 h-4.5" />
+                                    </button>
+                                </Magnetic>
                             </div>
                         ) : (
                             <Link

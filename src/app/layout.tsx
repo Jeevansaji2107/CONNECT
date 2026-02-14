@@ -8,6 +8,7 @@ import { NotificationListener } from "@/components/shared/NotificationListener";
 import { auth } from "@/auth";
 import { BackgroundEngine } from "@/components/shared/BackgroundEngine";
 import { SilenceModeWrapper } from "@/components/wellbeing/SilenceModeWrapper";
+import { ViewportHUD } from "@/components/shared/ViewportHUD";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +45,7 @@ export default async function RootLayout({
         <SessionProvider session={session}>
           <SilenceModeWrapper />
           <BackgroundEngine />
+          <ViewportHUD />
           <Navbar />
           <main className="min-h-screen pt-16">
             {children}

@@ -5,7 +5,9 @@ import { PostCard } from "./PostCard";
 import { Post } from "@/lib/types";
 import { getPosts } from "@/lib/actions/post-actions";
 import { useInView } from "react-intersection-observer";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useUIStore } from "@/lib/store";
+import { PostModal } from "./PostModal";
 
 interface InfinitePostListProps {
     initialPosts: Post[];
@@ -51,48 +53,64 @@ export const InfinitePostList = ({ initialPosts, initialCursor, filter = "all" }
         }
     }, [inView, hasMore, isLoading, loadMorePosts]);
 
+    const expandedPostId = useUIStore((state) => state.expandedPostId);
+    const setExpandedPostId = useUIStore((state) => state.setExpandedPostId);
+    const expandedPost = posts.find(p => p.id === expandedPostId);
+
     return (
-        <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={{
-                visible: {
-                    transition: {
-                        staggerChildren: 0.1
+        <>
+            <motion.div
+                initial="hidden"
+                animate="visible"
+                variants={{
+                    visible: {
+                        transition: {
+                            staggerChildren: 0.1
+                        }
                     }
-                }
-            }}
-            className="space-y-6"
-        >
-            {posts.map((post) => (
-                <motion.div
-                    key={post.id}
-                    variants={{
-                        hidden: { opacity: 0, y: 20 },
-                        visible: { opacity: 1, y: 0 }
-                    }}
-                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                >
-                    <PostCard
-                        post={post}
-                        isFollowingAuthorInitial={post.isFollowingAuthorInitial}
+                }}
+                className="space-y-6"
+            >
+                {/* ... existing map ... */}
+                {posts.map((post) => (
+                    <motion.div
+                        key={post.id}
+                        variants={{
+                            hidden: { opacity: 0, y: 20 },
+                            visible: { opacity: 1, y: 0 }
+                        }}
+                        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                        <PostCard
+                            post={post}
+                            isFollowingAuthorInitial={post.isFollowingAuthorInitial}
+                        />
+                    </motion.div>
+                ))}
+
+                {hasMore && (
+                    <div ref={ref} className="flex justify-center py-8">
+                        {isLoading && (
+                            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                        )}
+                    </div>
+                )}
+
+                {!hasMore && posts.length > 0 && (
+                    <p className="text-center text-muted-foreground text-sm py-8">
+                        You&apos;ve reached the end of the Connect stream.
+                    </p>
+                )}
+            </motion.div>
+
+            <AnimatePresence>
+                {expandedPost && (
+                    <PostModal
+                        post={expandedPost}
+                        onClose={() => setExpandedPostId(null)}
                     />
-                </motion.div>
-            ))}
-
-            {hasMore && (
-                <div ref={ref} className="flex justify-center py-8">
-                    {isLoading && (
-                        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                    )}
-                </div>
-            )}
-
-            {!hasMore && posts.length > 0 && (
-                <p className="text-center text-muted-foreground text-sm py-8">
-                    You&apos;ve reached the end of the Connect stream.
-                </p>
-            )}
-        </motion.div>
+                )}
+            </AnimatePresence>
+        </>
     );
 };

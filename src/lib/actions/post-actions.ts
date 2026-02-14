@@ -216,6 +216,7 @@ export async function getPosts(cursor?: string, limit: number = 10, filter: stri
 
         const formattedPosts = posts.map((post) => ({
             ...post,
+            image: post.media_urls?.[0] || null,
             mediaUrls: post.media_urls,
             createdAt: new Date(post.created_at).toISOString(),
             updatedAt: new Date(post.updated_at).toISOString(),
@@ -300,6 +301,7 @@ export async function getTrendingPosts(limit: number = 5) {
         const formattedPosts = posts
             .map((post) => ({
                 ...post,
+                image: post.media_urls?.[0] || null,
                 mediaUrls: post.media_urls,
                 createdAt: new Date(post.created_at).toISOString(),
                 updatedAt: new Date(post.updated_at).toISOString(),
@@ -457,6 +459,7 @@ export async function getBookmarkedPosts() {
             .map((b) => b.post)
             .map((post: any) => ({
                 ...post,
+                image: post.media_urls?.[0] || null,
                 mediaUrls: post.media_urls,
                 createdAt: new Date(post.created_at).toISOString(),
                 updatedAt: new Date(post.updated_at).toISOString(),
@@ -515,6 +518,7 @@ export async function getLikedPosts() {
             .map((l) => l.post)
             .map((post: any) => ({
                 ...post,
+                image: post.media_urls?.[0] || null,
                 mediaUrls: post.media_urls,
                 createdAt: new Date(post.created_at).toISOString(),
                 updatedAt: new Date(post.updated_at).toISOString(),

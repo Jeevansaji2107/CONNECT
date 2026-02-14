@@ -9,19 +9,40 @@ const io = new Server(server, {
     },
 });
 
+const onlineUsers = new Map(); // userId -> Set of socketIds
+
 io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
 
     socket.on("join-room", (room) => {
         socket.join(room);
         console.log(`User ${socket.id} joined room ${room}`);
+
+        // Track user presence if joining user room
+        if (room.startsWith("user-")) {
+            const userId = room.replace("user-", "");
+            if (!onlineUsers.has(userId)) {
+                onlineUsers.set(userId, new Set());
+            }
+            onlineUsers.get(userId).add(socket.id);
+            socket.userId = userId;
+
+            // Broadcast update
+            io.emit("presence-update", Array.from(onlineUsers.keys()));
+        }
     });
 
     socket.on("send-message", async (data) => {
         console.log("Message received:", data);
 
+        // Broadcast global activity to HUD
+        io.emit("global-activity", {
+            type: "MESSAGE",
+            userName: data.userName,
+            timestamp: Date.now()
+        });
+
         // Broadcast to specific room (conversation)
-        // Ensure room ID corresponds to the conversation pair
         io.to(data.room).emit("receive-message", {
             ...data,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -43,6 +64,16 @@ io.on("connection", (socket) => {
 
     socket.on("disconnect", () => {
         console.log("User disconnected:", socket.id);
+        if (socket.userId) {
+            const userSockets = onlineUsers.get(socket.userId);
+            if (userSockets) {
+                userSockets.delete(socket.id);
+                if (userSockets.size === 0) {
+                    onlineUsers.delete(socket.userId);
+                }
+            }
+            io.emit("presence-update", Array.from(onlineUsers.keys()));
+        }
     });
 });
 
